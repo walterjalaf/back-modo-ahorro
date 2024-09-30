@@ -215,4 +215,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# Database config
+database.json
+
 # End of https://www.toptal.com/developers/gitignore/api/windows,node,linux,macos
