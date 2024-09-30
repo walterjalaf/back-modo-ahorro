@@ -11,13 +11,13 @@ const morgan = require("morgan");
 app.use(morgan("dev"))
 
 
-
-
 // Instancia de la ruta donde tengo mi http.
 
-const empresa_routes = require('../../routes/empresa')
+const form_empresa_routes = require("../../routes/formEmpresa");
 
-const gestor_routes = require('../../routes/gestor')
+const empresa_routes = require('../../routes/empresa');
+
+const gestor_routes = require('../../routes/gestor');
 
 /**
  * 
@@ -36,7 +36,8 @@ app.use((req,res,next)=>{
     next();
 });
 
-app.use(express.json())
+app.use(express.json());
+app.use('/api', form_empresa_routes);
 app.use('/api', empresa_routes);
 app.use('/api', gestor_routes);
 

@@ -1,6 +1,8 @@
 var jwt = require('jwt-simple')
 var moment =require('moment')
-var secret = "modo-ahorro-13.08"
+require('dotenv').config();
+
+const secret = process.env.SECRET;
 
 exports.auth = function (req, res, next){
     if (!req.headers.authorization){
@@ -26,6 +28,7 @@ exports.auth = function (req, res, next){
             
             
         } catch (error) {
+            console.log(error);
             return res.status(403).send({
                 message: "Error token."
             })

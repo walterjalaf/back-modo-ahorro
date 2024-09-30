@@ -1,6 +1,8 @@
 var jwt = require('jwt-simple');
-var moment = require("moment")
-var secret = "modo-ahorro-13.08"
+var moment = require("moment");
+require('dotenv').config();
+
+const secret = process.env.SECRET;
 
 exports.createToken = function (user) {
     const payload = {
@@ -11,4 +13,10 @@ exports.createToken = function (user) {
         exp: moment().add(1, 'day').unix(),
     }
     return jwt.encode(payload, secret);
+}
+
+// Decodifica el token y retorna el id del usuario gestor
+exports.decodeToken = function (req) {
+    const token = jwt.decode(req.headers.authorization.replace(/['"]+/g,''), secret);
+    return token.sub;
 }
