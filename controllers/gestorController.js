@@ -1,6 +1,8 @@
 
 
+const { where, Sequelize } = require('sequelize');
 var jwt =require('../helpers/jwt'); // instancia para crear tokens
+const Empresa = require('../src/models/empresa.model');
 
 const Gestor = require("../src/models/gestor.model"); // instancia del modelo de la tabla Gestor.
 
@@ -14,7 +16,7 @@ const bycrypt = require("bcrypt-nodejs"); // Instancia para encriptar datos.
  */
 const registro_gestor = async function (req, res) {
 
-    if ( req.user) {
+    if ( !req.user) {
         // Obtengo los datos enviados desde el formulario
     const data = req.body;
         
@@ -27,23 +29,18 @@ const registro_gestor = async function (req, res) {
         const gestor_email = await Gestor.findAll({where: {email:data.email}})
 
         // Encripto la contraseña 
-        bycrypt.hash('123456789', null, null, async function (err, hash) {
-            
+        bycrypt.hash(data.password, null, null, async function (err, hash) {
             if (err){
-
                 res.status(200).send(
                     {data:undefined,
                     message: "No se pudo generar la contraseña."})
-
             }else{
                 if(gestor_email.length >= 1){
-                    
                     res.status(200).send(
                         {data:undefined,
                         message: "El correo electrónico ya existe."})
                 }else{
                     console.log("Creando gestor");
-                    
                     let gestor = await Gestor.create({
                         gestor_nombre: data.gestor_nombre,
                         gestor_apellido: data.gestor_apellido,
@@ -53,16 +50,11 @@ const registro_gestor = async function (req, res) {
                         email: data.email
                     })
                     res.status(200).send({
-                        data: gestor
-                        
+                        data: gestor 
                     });
-
-                   
-                    
                 }
             }
         });
-        
     } catch (err) {
         res.status(200).send({data: undefined, message:"Verifique los campos del formulario." + err})
     }
@@ -73,40 +65,30 @@ const registro_gestor = async function (req, res) {
 }
 
 const login_gestor = async function (req, res) {
-
     // Obtengo los datos enviados desde el formulario
     let data = req.body;
     console.log({data});
-    
-    
     //Realizo una consulta sobre si un email se encuentra en la tabla gestor.
     const gestor_email = await Gestor.findAll({where: {email:data.email}})
-
     //Verifico que el email se encuentra en la mi base de datos
     if (gestor_email.length >=1){
-        
         // si el estado es true es porque tiene acceso a la plataforma
         bycrypt.compare(
             data.password,
             gestor_email[0].password,
             async function (err, check) {
-
             if (check){
                 // Si el email y la contraseña son correctos se crea el token.
                 res.status(200).send({
                     data: gestor_email[0],
                     token: jwt.createToken(gestor_email[0])})
             }else{
-
                 res.status(200).send({
                     data:undefined,
                     message: "La contraseña no existe."})
             }
         })    
-        
-        
     } else {
-
         res.status(200).send({
             data:undefined,
             message: "El correo electrónico no existe."})
@@ -115,7 +97,10 @@ const login_gestor = async function (req, res) {
 
 const listar_gestores = async function (req, res) {
     if ( req.user) {
-        let gestores = await Gestor.findAll();
+        let gestores = await Gestor.findAll({
+            include: [{ all: true}]
+        });
+        console.log(gestores);
         res.status(200).send({
             data: gestores
         })
@@ -128,23 +113,17 @@ const listar_gestores = async function (req, res) {
 
 const obtener_datos_gestor = async function (req, res) {
     if ( req.user) {
-
         let id = req.params['id'];
-
         try {
             let gestor = await Gestor.findByPk(id)
-
         res.status(200).send({
             data: gestor
         })
-            
         } catch (error) {
             res.status(200).send({
                 data: undefined
             })
-            
         }
-        
     }else {
         res.status(403).send({data: undefined, message:"No se pudo encontrar el gestor."})
 
@@ -179,10 +158,7 @@ const actualizar_gestor = async function (req, res) {
 
         res.status(200).send({
             data: gestor
-        })
-        
-        
-        
+        }) 
     } else {
         res.status(403).send({data: undefined, message:"No token."})
 

@@ -1,12 +1,15 @@
 
 const {Sequelize, Model, DataTypes, UUIDV4} = require("sequelize")
+require('dotenv').config();
+
+var env = process.env.NODE_ENV || 'development';
+const dbconfig = require('../../config/database.json')[env];
 
 const sequelize = new Sequelize(
-    "mibase", "admin", "12345678", {
-    host: 'localhost',
-    dialect: 'mysql' 
+    dbconfig.database, dbconfig.username, dbconfig.password, {
+    host: dbconfig.host,
+    dialect: dbconfig.dialect
   });
-
 
 
 class Gestor extends Model{}
@@ -69,5 +72,6 @@ Gestor.init({
     sequelize,
     modelName: "gestor"
 })
+
 
 module.exports = Gestor
